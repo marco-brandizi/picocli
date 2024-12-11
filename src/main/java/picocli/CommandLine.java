@@ -15346,7 +15346,7 @@ public class CommandLine {
             synopsisHeading = "%nUsage: ", helpCommand = true,
             description = {"%nWhen no COMMAND is given, the usage help for the main command is displayed.",
                     "If a COMMAND is specified, the help for that command is shown.%n"})
-    public static final class HelpCommand implements IHelpCommandInitializable, IHelpCommandInitializable2, Runnable {
+    public static final class HelpCommand implements IHelpCommandInitializable, IHelpCommandInitializable2, Callable<Integer> {
 
         @Option(names = {"-h", "--help"}, usageHelp = true, descriptionKey = "helpCommand.help",
                 description = "Show usage help for the help command and exit.")
@@ -15365,9 +15365,11 @@ public class CommandLine {
         private Help.ColorScheme colorScheme;
 
         /** Invokes {@link #usage(PrintStream, Help.ColorScheme) usage} for the specified command, or for the parent command. */
-        public void run() {
+        @Override
+        public Integer call () {
+        		// TODO: self can't be null here, why the check?
             CommandLine parent = self == null ? null : self.getParent();
-            if (parent == null) { return; }
+            if (parent == null) { return self.getCommandSpec ().exitCodeOnUsageHelp (); }
             Help.ColorScheme colors = colorScheme != null ? colorScheme : Help.defaultColorScheme(ansi);
             if (commands != null) {
                 Map<String, CommandLine> parentSubcommands = parent.getCommandSpec().subcommands();
@@ -15382,6 +15384,7 @@ public class CommandLine {
                     } else {
                         subcommand.usage(out, colors); // for compatibility with pre-4.0 clients
                     }
+                    return subcommand.getCommandSpec ().exitCodeOnUsageHelp ();
                 } else {
                     throw new ParameterException(parent, "Unknown subcommand '" + commands + "'.", null, commands);
                 }
@@ -15391,6 +15394,7 @@ public class CommandLine {
                 } else {
                     parent.usage(out, colors); // for compatibility with pre-4.0 clients
                 }
+                return parent.getCommandSpec ().exitCodeOnUsageHelp ();
             }
         }
         /** {@inheritDoc} */

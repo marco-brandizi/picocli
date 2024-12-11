@@ -17,3 +17,7 @@ picocli.iml
 /src/test/dejagnu.tests/tmp/
 /picocli-tests-java567/gradle/wrapper/dists/**/*.lck
 /picocli-tests-java567/gradle/wrapper/dists/**/*.ok
+# Eclipse files
+.classpath
+.project
+.settings/
